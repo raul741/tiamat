@@ -24,11 +24,6 @@ var (
 	clientList []*Client
 )
 
-func (I Instructions) Send(c net.Conn) {
-	message := "Do a flip!\n"
-	c.Write([]byte(message))
-}
-
 func Server() {
 	p := viper.GetString("Server.Port")
 	if p != "" {
@@ -59,12 +54,10 @@ func handleConn(conn net.Conn) {
 	}
 	client.Conn = conn
 	fmt.Println("Got info from new user:", client.OS_username, client.OperatingSystem)
-	clientList = append(clientList, client)
-}
-
-func sendInstructions(conn net.Conn) {
-	i := Instructions{}
-	i.Send(conn)
+	// for i, v := range clientList {
+	// 	fmt.Println(i, v)
+	//
+	// }
 }
 
 func getOS(conn net.Conn) (*Client, error) {

@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"embed"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -11,6 +12,9 @@ var (
 	WebPort string = "8080"
 )
 
+//go:embed templates/*
+var templatesFolder embed.FS
+
 func WebServer() {
 	p := viper.GetString("Server.WebPort")
 	if p != "" {
@@ -18,10 +22,15 @@ func WebServer() {
 	}
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
+	LoadHTMLFromEmbedFS(r, templatesFolder, "templates/*.html")
+	r.StaticFileFS("/style.css", "./templates/style.css", http.FS(templatesFolder))
 	r.GET("/", getRoot)
 	r.Run(":" + WebPort)
 }
 
 func getRoot(c *gin.Context) {
-	c.String(http.StatusOK, "Hello world!\n")
+	c.HTML(http.StatusOK, "templates/index.html", gin.H{
+		"UserAgent": c.Request.UserAgent(),
+		"Clients":   clientList,
+	})
 }
