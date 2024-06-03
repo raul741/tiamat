@@ -15,8 +15,12 @@
       <hr>
       <h2>Current clients</h2>
       {{ range .Clients }}
-      <p>{{ .OS_username }}</p>
+      <p>{{ .Username }}</p>
+      <p>{{ .UID }}</p>
+      <p>{{ .GID }}</p>
+      <p>{{ .Hostname }}</p>
       <p>{{ .OperatingSystem }}</p>
+      <hr>
       {{ end }}
     </div>
   </div>
