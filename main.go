@@ -1,7 +1,7 @@
 /*
-Copyright © 2024 raul
-
+Copyright © 2024 raul <raul@bulgariu.xyz>
 */
+
 package main
 
 import "tiamat/cmd"
