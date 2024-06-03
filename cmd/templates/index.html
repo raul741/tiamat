@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>AEMET Client</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="style.css" rel="stylesheet">
+</head>
+
+<body>
+  <div class="container">
+    <div id="main">
+      <p>Hello {{ .UserAgent }}</p>
+      <hr>
+      <h2>Current clients</h2>
+      {{ range .Clients }}
+      <p>{{ .OS_username }}</p>
+      <p>{{ .OperatingSystem }}</p>
+      {{ end }}
+    </div>
+  </div>
+</body>
+
+</html>
