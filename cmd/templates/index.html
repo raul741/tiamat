@@ -14,14 +14,32 @@
       <p>Hello {{ .UserAgent }}</p>
       <hr>
       <h2>Current clients</h2>
+
       {{ range .Clients }}
-      <p>{{ .Username }}</p>
-      <p>{{ .UID }}</p>
-      <p>{{ .GID }}</p>
-      <p>{{ .Hostname }}</p>
-      <p>{{ .OperatingSystem }}</p>
+      <table border=1>
+        <tr>
+          <td rowspan=2>Status</td>
+          <td>IP</td>
+          <td>Username</td>
+          <td>Hostname</td>
+          <td>Operating System</td>
+          <td rowspan=2>Actions</td>
+        </tr>
+        <tr>
+          <td>{{ .PublicIP }}</td>
+          <td>{{ .Username }}</td>
+          <td>{{ .Hostname }}</td>
+          <td>{{ .OperatingSystem }}</td>
+        </tr>
+      </table>
       <hr>
       {{ end }}
+
+      <!-- <p>{{ .Username }}</p> -->
+      <!-- <p>{{ .UID }}</p> -->
+      <!-- <p>{{ .GID }}</p> -->
+      <!-- <p>{{ .Hostname }}</p> -->
+      <!-- <p>{{ .OperatingSystem }}</p> -->
     </div>
   </div>
 </body>
