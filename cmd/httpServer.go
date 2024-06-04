@@ -24,6 +24,7 @@ func WebServer() {
 	r := gin.Default()
 	LoadHTMLFromEmbedFS(r, templatesFolder, "templates/*.html")
 	r.StaticFileFS("/style.css", "./templates/style.css", http.FS(templatesFolder))
+	r.StaticFileFS("/htmx.js", "./templates/htmx.js", http.FS(templatesFolder))
 	r.GET("/", getRoot)
 	r.Run(":" + WebPort)
 }

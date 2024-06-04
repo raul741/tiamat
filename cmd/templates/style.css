@@ -37,13 +37,13 @@ td.date {
   padding-right: 5px;
 }
 
-cold {
-  color: darkcyan;
+on {
+  color: green;
   font-weight: 500;
 }
 
-hot {
-  color: darkorange;
+off {
+  color: red;
   font-weight: 500;
 }
 

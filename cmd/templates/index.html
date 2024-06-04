@@ -2,10 +2,12 @@
 <html lang="en">
 
 <head>
-  <title>AEMET Client</title>
+  <title>Tiamat Dashboard</title>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="style.css" rel="stylesheet">
+  <script href="htmx.js" integrity="sha384-qbtR4rS9RrUMECUWDWM2+YGgN3U4V4ZncZ0BvUcg9FGct0jqXz3PUdVpU1p0yrXS"
+    crossorigin="anonymous"></script>
 </head>
 
 <body>
@@ -13,12 +15,12 @@
     <div id="main">
       <p>Hello {{ .UserAgent }}</p>
       <hr>
-      <h2>Current clients</h2>
+      <h2 align=center>Current clients</h2>
 
       {{ range .Clients }}
       <table border=1>
         <tr>
-          <td rowspan=2>Status</td>
+          <td>Status</td>
           <td>IP</td>
           <td>Username</td>
           <td>Hostname</td>
@@ -26,20 +28,25 @@
           <td rowspan=2>Actions</td>
         </tr>
         <tr>
-          <td>{{ .PublicIP }}</td>
-          <td>{{ .Username }}</td>
-          <td>{{ .Hostname }}</td>
-          <td>{{ .OperatingSystem }}</td>
+          <td>
+            {{ if .IsOnline }}
+            <on>
+              OK
+            </on>
+            {{ else }}
+            <off>
+              Offline
+            </off>
+            {{ end }}
+          </td>
+          <td>{{ .ClientBasicInfo.PublicIP }}</td>
+          <td>{{ .ClientBasicInfo.Username }}</td>
+          <td>{{ .ClientBasicInfo.Hostname }}</td>
+          <td>{{ .ClientBasicInfo.OperatingSystem }}</td>
         </tr>
       </table>
       <hr>
       {{ end }}
-
-      <!-- <p>{{ .Username }}</p> -->
-      <!-- <p>{{ .UID }}</p> -->
-      <!-- <p>{{ .GID }}</p> -->
-      <!-- <p>{{ .Hostname }}</p> -->
-      <!-- <p>{{ .OperatingSystem }}</p> -->
     </div>
   </div>
 </body>
