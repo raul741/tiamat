@@ -5,21 +5,33 @@ import (
 	"fmt"
 	"log"
 	"net"
+	//"reflect"
 	"time"
 
 	"github.com/spf13/viper"
 )
 
 type Client struct {
+	ClientBasicInfo
+	Conn     net.Conn
+	IsOnline bool
+}
+
+type ClientBasicInfo struct {
 	Username        string
 	UID             string
 	GID             string
 	OperatingSystem string
 	Hostname        string
-	Conn            net.Conn
+	PublicIP        string
 }
 
 type Instructions struct {
+	IsHeartbeat bool
+	Message     string
+}
+
+type Response struct {
 	Message string
 }
 
@@ -61,38 +73,71 @@ func Server() {
 }
 
 func handleConn(conn net.Conn) {
-	client, err := getOS(conn)
+	client, err := getClient(conn)
 	if err != nil {
 		log.Printf("Error happened receiving OS information: %v\n", err)
 	}
-	client.Conn = conn
-	fmt.Printf("Got info from new user:\nUsername: %v\nUID: %v\nGID: %v\nHostname: %v\nOS: %v\n", client.Username,
-		client.UID, client.GID, client.Hostname, client.OperatingSystem)
-	time.Sleep(time.Second * 7)
-	fmt.Println("7 seconds have passed, sending message!")
-	time.Sleep(time.Millisecond * 500)
-	newMessage := Instructions{
-		Message: "Hello world",
-	}
-	for {
-		time.Sleep(time.Second)
-		client.Instruct(newMessage)
-	}
+	fmt.Printf("Got info from new user:\nUsername: %v\nUID: %v\nGID: %v\nHostname: %v\nOS: %v\n", client.ClientBasicInfo.Username,
+		client.ClientBasicInfo.UID, client.ClientBasicInfo.GID, client.ClientBasicInfo.Hostname, client.ClientBasicInfo.OperatingSystem)
 
-	// for i, v := range clientList {
-	// 	fmt.Println(i, v)
-	//
-	// }
+	go Heartbeat(*client, conn)
 }
 
-func getOS(conn net.Conn) (*Client, error) {
+func Heartbeat(client Client, conn net.Conn) {
+	for {
+		inst := Instructions{
+			IsHeartbeat: true,
+			Message:     "PING",
+		}
+		client.Instruct(inst)
+		log.Printf("Pinging %v...\n", client.ClientBasicInfo.PublicIP)
+
+		resp, err := ServerMessageReceiver(conn)
+		if err == nil && resp.Message == "PONG" {
+			fmt.Printf("Client %v is online!\n", client.ClientBasicInfo.PublicIP)
+			client.IsOnline = true
+		} else {
+			fmt.Printf("Client %v is offline :(\n", client.ClientBasicInfo.PublicIP)
+			client.IsOnline = false
+			return
+		}
+
+		time.Sleep(time.Second * 10)
+	}
+}
+
+func ServerMessageReceiver(conn net.Conn) (Response, error) {
 	dec := gob.NewDecoder(conn)
-	c := new(Client)
-	err := dec.Decode(&c)
+	c := new(Response)
+	err := dec.Decode(c)
+	if err != nil {
+		return Response{}, err
+	}
+	return *c, nil
+}
+
+func getClient(conn net.Conn) (*Client, error) {
+	dec := gob.NewDecoder(conn)
+	basicC := new(ClientBasicInfo)
+	err := dec.Decode(&basicC)
 	if err != nil {
 		bad := Client{}
 		return &bad, err
 	}
-	clientList = append(clientList, c)
-	return c, nil
+	newC := new(Client)
+	newC.ClientBasicInfo = *basicC
+	newC.Conn = conn
+	newC.IsOnline = true
+
+	// for _, v := range clientList {
+	// 	sameClient := reflect.DeepEqual(c, v.ClientInfo)
+	// 	if sameClient == true {
+	// 		fmt.Println("CLIENT ALREADY PRESENT, SETTING TO ONLINE")
+	// 		c.IsOnline = true
+	// 		return c, nil
+	// 	}
+	// }
+	//fmt.Println("CLIENT NOT PRESENT, ADDING TO LIST")
+	clientList = append(clientList, newC)
+	return newC, nil
 }
