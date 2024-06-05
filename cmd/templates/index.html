@@ -5,7 +5,7 @@
   <title>Tiamat Dashboard</title>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link href="style.css" rel="stylesheet">
+  <link href="/style.css" rel="stylesheet">
   <script href="htmx.js" integrity="sha384-qbtR4rS9RrUMECUWDWM2+YGgN3U4V4ZncZ0BvUcg9FGct0jqXz3PUdVpU1p0yrXS"
     crossorigin="anonymous"></script>
 </head>
@@ -20,14 +20,19 @@
       {{ range .Clients }}
       <table border=1>
         <tr>
+          <td>ID</td>
           <td>Status</td>
           <td>IP</td>
           <td>Username</td>
           <td>Hostname</td>
           <td>Operating System</td>
           <td rowspan=2>Actions</td>
+          <td rowspan=2>
+            <a target="_blank" href="command/{{ .ClientID }}">Execute commands</a>
+          </td>
         </tr>
         <tr>
+          <td>{{ .ClientID }}</td>
           <td>
             {{ if .IsOnline }}
             <on>
