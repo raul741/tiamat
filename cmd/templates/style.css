@@ -99,6 +99,11 @@ form {
   text-align: center;
 }
 
+td a {
+  display: block;
+  width: 100%;
+}
+
 a {
   color: #ff6e00;
   text-decoration: none;
@@ -131,6 +136,12 @@ footer {
   padding: 10px;
   outline: solid 2px #ff6e00;
   overflow: scroll;
+}
+
+div#command {
+  width: 50%;
+  height: 40%;
+  border: 2px solid black;
 }
 
 @media (max-width: 600px) {
