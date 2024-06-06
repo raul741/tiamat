@@ -6,7 +6,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="/style.css" rel="stylesheet">
-  <script href="htmx.js" integrity="sha384-qbtR4rS9RrUMECUWDWM2+YGgN3U4V4ZncZ0BvUcg9FGct0jqXz3PUdVpU1p0yrXS"
+  <script src="/htmx.js" integrity="sha384-qbtR4rS9RrUMECUWDWM2+YGgN3U4V4ZncZ0BvUcg9FGct0jqXz3PUdVpU1p0yrXS"
     crossorigin="anonymous"></script>
 </head>
 
@@ -15,10 +15,14 @@
     <div id="main">
       <p>Hello {{ .UserAgent }}</p>
       <hr>
+      <h2>Executing commands for {{ .Client.ClientBasicInfo.Hostname }}</h2>
+      <hr>
       <div id=command>
       </div>
-      <input type="text" name="command" value="" hx-post="command/{{ .Client.ClientID }}" hx-target="command"
-        hx-trigger="keyup[keyCode==13]">
+      <form hx-post="/command/{{ .Client.ClientID }}" hx-target="#command" hx-on--after-request="this.reset()">
+        <label><input type="text" name="cmd" value=""></label>
+        <button type="submit" id="but">Submit</button>
+      </form>
       <hr>
     </div>
   </div>

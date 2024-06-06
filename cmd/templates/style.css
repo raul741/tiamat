@@ -142,6 +142,8 @@ div#command {
   width: 50%;
   height: 40%;
   border: 2px solid black;
+  overflow: scroll;
+  text-wrap: nowrap;
 }
 
 @media (max-width: 600px) {
