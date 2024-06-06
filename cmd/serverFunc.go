@@ -95,8 +95,8 @@ func sendCommand(ID int, command string) (Output string, err error) {
 	clientList[ID].Instruct(inst)
 	resp, err := ServerMessageReceiver(clientList[ID].Conn)
 	if err != nil || resp.Successful != true {
-		fmt.Println("Something went wrong")
-		return "", err
+		e := fmt.Errorf("%v\n", resp.Message)
+		return "", e
 	}
 	fmt.Println(resp.Message)
 	return resp.Message, nil
@@ -119,7 +119,7 @@ func Heartbeat(ID int) {
 			return
 		}
 
-		time.Sleep(time.Second * 5)
+		time.Sleep(time.Second * 10)
 	}
 }
 
@@ -129,18 +129,18 @@ func returnClient(ID int) (Client, error) {
 			return v, nil
 		}
 	}
-	err := fmt.Errorf("Client not found")
+	err := fmt.Errorf("Client not found\n")
 	return Client{}, err
 }
 
 func ServerMessageReceiver(conn net.Conn) (Response, error) {
 	dec := gob.NewDecoder(conn)
-	c := new(Response)
-	err := dec.Decode(c)
+	c := Response{}
+	err := dec.Decode(&c)
 	if err != nil {
 		return Response{}, err
 	}
-	return *c, nil
+	return c, nil
 }
 
 func getClient(conn net.Conn) (int, error) {
