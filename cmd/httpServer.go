@@ -12,11 +12,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-type ClientJSON struct {
-	Date time.Time
-	List []ClientBasicInfo
-}
-
 var (
 	WebPort string = "8080"
 )

