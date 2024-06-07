@@ -154,7 +154,10 @@ input#commandinput {
 
 input#commandinput:focus {
   outline: 2px solid #ff6e00;
+}
 
+a#pointer {
+  cursor: pointer;
 }
 
 
