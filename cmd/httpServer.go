@@ -75,5 +75,5 @@ func execCMD(c *gin.Context) {
 		return
 	}
 	prettyOut := strings.Replace(out, "\n", "<br>", -1)
-	c.String(http.StatusOK, "$ "+prettyOut)
+	c.String(http.StatusOK, "$ "+command+"<br>"+prettyOut)
 }

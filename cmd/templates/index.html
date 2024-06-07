@@ -13,7 +13,16 @@
 <body>
   <div class="container">
     <div id="main">
-      <p>Hello {{ .UserAgent }}</p>
+      <b>
+        <ul>
+          <li class="hor">
+            <p><a href="/">Home</a></p>
+          </li>
+          <li class="hor">
+            <p><a href="https://git.bulgariu.xyz/raul/aemet" target="_blank">Source code</a></p>
+          </li>
+        </ul>
+      </b>
       <hr>
       <h2 align=center>Current clients</h2>
 
@@ -26,9 +35,8 @@
           <td>Username</td>
           <td>Hostname</td>
           <td>Operating System</td>
-          <td rowspan=2>Actions</td>
           <td rowspan=2>
-            <a target="_blank" href="command/{{ .ClientID }}">Execute commands</a>
+            <a target="_blank" href="command/{{ .ClientID }}"><b>CMD</b></a>
           </td>
         </tr>
         <tr>

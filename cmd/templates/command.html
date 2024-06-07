@@ -13,17 +13,26 @@
 <body>
   <div class="container">
     <div id="main">
-      <p>Hello {{ .UserAgent }}</p>
+      <b>
+        <ul>
+          <li class="hor">
+            <p><a href="/">Home</a></p>
+          </li>
+          <li class="hor">
+            <p><a href="https://git.bulgariu.xyz/raul/aemet" target="_blank">Source code</a></p>
+          </li>
+        </ul>
+      </b>
       <hr>
-      <h2>Executing commands for {{ .Client.ClientBasicInfo.Hostname }}</h2>
+      <h2 align=center>Executing commands for {{ .Client.ClientBasicInfo.Hostname }}</h2>
       <hr>
       <div id=command>
       </div>
+      <br>
       <form hx-post="/command/{{ .Client.ClientID }}" hx-target="#command" hx-on--after-request="this.reset()">
-        <label><input type="text" name="cmd" value=""></label>
+        <label><input id="commandinput" type="text" name="cmd" value="" required autofocus></label>
         <button type="submit" id="but">Submit</button>
       </form>
-      <hr>
     </div>
   </div>
 </body>

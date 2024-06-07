@@ -31,10 +31,9 @@ td.left {
   padding-left: 5px;
 }
 
-td.date {
+td {
   text-align: center;
-  padding-left: 5px;
-  padding-right: 5px;
+  padding: 5px;
 }
 
 on {
@@ -99,9 +98,10 @@ form {
   text-align: center;
 }
 
-td a {
+td a.clickable {
   display: block;
   width: 100%;
+  margin: 0;
 }
 
 a {
@@ -139,12 +139,24 @@ footer {
 }
 
 div#command {
-  width: 50%;
-  height: 40%;
+  width: 100%;
+  height: 50%;
   border: 2px solid black;
   overflow: scroll;
+  padding-bottom: 30px;
   text-wrap: nowrap;
 }
+
+input#commandinput {
+  width: 60%;
+  height: 20px;
+}
+
+input#commandinput:focus {
+  outline: 2px solid #ff6e00;
+
+}
+
 
 @media (max-width: 600px) {
   #main {
@@ -160,7 +172,7 @@ div#command {
   top: 1px;
   left: 1px;
 
-  outline: solid 1px black;
+  /* outline: solid 1px black; */
   justify-content: center;
   align-items: center;
   height: 99vh;
