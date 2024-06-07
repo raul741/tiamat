@@ -1,0 +1,4 @@
+[Server]
+WebPort = "8080"
+Port = "1302"
+ClientPath = "/home/raul/.config/tiamat/clients.json"
