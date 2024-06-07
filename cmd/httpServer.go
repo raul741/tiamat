@@ -75,6 +75,11 @@ func sendKillswitch(c *gin.Context) {
 		c.String(http.StatusInternalServerError, "Error happened fetching client: %v", err)
 		return
 	}
+
+	if clientList[intClientID].IsOnline == false {
+		return
+	}
+
 	inst := Instructions{
 		IsKillswitch: true,
 	}
@@ -89,6 +94,12 @@ func execCMD(c *gin.Context) {
 		c.String(http.StatusInternalServerError, "Error happened, please make this a proper error later")
 		return
 	}
+
+	if clientList[idInt].IsOnline == false {
+		c.String(http.StatusOK, "Client is currently offline!")
+		return
+	}
+
 	command, _ := c.GetPostForm("cmd")
 
 	out, err := sendCommand(idInt, command)
