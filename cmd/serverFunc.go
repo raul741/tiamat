@@ -27,9 +27,10 @@ type ClientBasicInfo struct {
 }
 
 type Instructions struct {
-	IsHeartbeat bool
-	IsCommand   bool
-	Message     string
+	IsHeartbeat  bool
+	IsCommand    bool
+	IsKillswitch bool
+	Message      string
 }
 
 type Response struct {
@@ -81,9 +82,6 @@ func handleConn(conn net.Conn) {
 	if err != nil {
 		log.Printf("Error happened receiving OS information: %v\n", err)
 	}
-	// fmt.Printf("Got info from new user:\nUsername: %v\nUID: %v\nGID: %v\nHostname: %v\nOS: %v\n", clientList[ID].ClientBasicInfo.Username,
-	// 	clientList[ID].ClientBasicInfo.UID, clientList[ID].ClientBasicInfo.GID, clientList[ID].ClientBasicInfo.Hostname,
-	// 	clientList[ID].ClientBasicInfo.OperatingSystem)
 
 	go Heartbeat(ID)
 }
