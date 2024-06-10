@@ -17,6 +17,8 @@ var (
 	clientList []Client
 	clientIDs  int = 0
 
+	heartbeatRate time.Duration = 15
+
 	isUsingJSONParameter bool
 	clientJSONPath       string = "/.config/tiamat/clients.json"
 )
@@ -139,7 +141,7 @@ func Heartbeat(ID int) {
 			return
 		}
 
-		time.Sleep(time.Second * 10)
+		time.Sleep(time.Second * heartbeatRate)
 	}
 }
 
