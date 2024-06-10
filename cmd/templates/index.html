@@ -35,7 +35,8 @@
         <tr>
           <td>ID</td>
           <td>Status</td>
-          <td>IP</td>
+          <td>Remote IP</td>
+          <td>Local IP</td>
           <td>Username</td>
           <td>Hostname</td>
           <td>Operating System</td>
@@ -60,6 +61,7 @@
             {{ end }}
           </td>
           <td>{{ .ClientBasicInfo.PublicIP }}</td>
+          <td>{{ .ClientBasicInfo.LocalIP }}</td>
           <td>{{ .ClientBasicInfo.Username }}</td>
           <td>{{ .ClientBasicInfo.Hostname }}</td>
           <td>{{ .ClientBasicInfo.OperatingSystem }}</td>

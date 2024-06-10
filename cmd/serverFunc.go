@@ -174,7 +174,7 @@ func getClient(conn net.Conn) (int, error) {
 	for i, v := range clientList {
 		sameClient := basicC.Username == v.ClientBasicInfo.Username &&
 			basicC.PublicIP == v.ClientBasicInfo.PublicIP &&
-			basicC.Hostname == v.ClientBasicInfo.Hostname
+			basicC.Hostname == v.ClientBasicInfo.Hostname && basicC.LocalIP == v.ClientBasicInfo.LocalIP
 
 		if sameClient == true {
 			clientList[i].IsOnline = true

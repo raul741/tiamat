@@ -24,6 +24,7 @@ type ClientBasicInfo struct {
 	OperatingSystem string
 	Hostname        string
 	PublicIP        string
+	LocalIP         string
 }
 
 type Instructions struct {
