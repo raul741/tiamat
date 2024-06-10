@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-  <title>Tiamat Dashboard</title>
+  <title>Tiamat | Dashboard</title>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="/style.css" rel="stylesheet">
@@ -29,17 +29,18 @@
       </b>
       <hr>
       <h2 align=center>Current clients</h2>
+      <hr>
 
       {{ range .Clients }}
       <table border=1>
         <tr>
-          <td>ID</td>
-          <td>Status</td>
-          <td>Remote IP</td>
-          <td>Local IP</td>
-          <td>Username</td>
-          <td>Hostname</td>
-          <td>Operating System</td>
+          <td id="bold">ID</td>
+          <td id="bold">Status</td>
+          <td id="bold">Remote IP</td>
+          <td id="bold">Local IP</td>
+          <td id="bold">Username</td>
+          <td id="bold">Hostname</td>
+          <td id="bold">Operating System</td>
           <td rowspan=2>
             <a target="_blank" href="command/{{ .ClientID }}"><b>CMD</b></a>
           </td>
