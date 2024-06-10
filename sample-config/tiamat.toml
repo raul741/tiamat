@@ -1,0 +1,9 @@
+[Server]
+# Port to use for web interface
+#WebPort = "8080"
+
+# Port to use for communicating with clients
+#Port = "1302"
+
+# Path to look for clients in
+#ClientPath = "/home/raul/.config/tiamat/clients.json"

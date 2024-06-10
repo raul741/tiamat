@@ -1,0 +1,14 @@
+{
+    "Date": "2024-06-10T09:22:29.047338443+02:00",
+    "List": [
+        {
+            "Username": "sample_user",
+            "UID": "1000",
+            "GID": "1000",
+            "OperatingSystem": "linux",
+            "Hostname": "sample_hostname",
+            "PublicIP": "127.0.0.1",
+            "LocalIP": "127.0.0.1"
+        }
+    ]
+}
