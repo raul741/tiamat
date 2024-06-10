@@ -1,0 +1,20 @@
+version: '3'
+
+networks:
+  tiamat:
+    driver: bridge
+
+services:
+  tiamat:
+    container_name: "tiamat"
+    #image: "tiamat"
+    build:
+      context: .
+      dockerfile: "Dockerfile"
+    ports:
+      - 8080:8080
+      - 1302:1302
+    networks:
+      - tiamat
+    volumes:
+      - ./sample-config/:/root/.config/tiamat/
