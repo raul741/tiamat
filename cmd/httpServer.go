@@ -29,6 +29,8 @@ func WebServer() {
 	LoadHTMLFromEmbedFS(r, templatesFolder, "templates/*.html")
 	r.StaticFileFS("/style.css", "./templates/style.css", http.FS(templatesFolder))
 	r.StaticFileFS("/htmx.js", "./templates/htmx.js", http.FS(templatesFolder))
+	setFavicons(r)
+
 	r.GET("/", getRoot)
 	r.GET("/command/:clientid", getCommands)
 	r.POST("/command/:clientid", execCMD)
@@ -110,4 +112,14 @@ func execCMD(c *gin.Context) {
 	}
 	prettyOut := strings.Replace(out, "\n", "<br>", -1)
 	c.String(http.StatusOK, "$ "+command+"<br>"+prettyOut)
+}
+
+func setFavicons(r *gin.Engine) {
+	r.StaticFileFS("/favicon.ico", "./templates/assets/favicon.ico", http.FS(templatesFolder))
+	r.StaticFileFS("/favicon-32x32.png", "./templates/assets/favicon-32x32.png", http.FS(templatesFolder))
+	r.StaticFileFS("/favicon-16x16.png", "./templates/assets/favicon-16x16.png", http.FS(templatesFolder))
+	r.StaticFileFS("/apple-touch-icon.png", "./templates/assets/apple-touch-icon.png", http.FS(templatesFolder))
+	r.StaticFileFS("/android-chrome-512x512.png", "./templates/assets/android-chrome-512x512.png", http.FS(templatesFolder))
+	r.StaticFileFS("/android-chrome-192x192.png", "./templates/assets/android-chrome-192x192.png", http.FS(templatesFolder))
+	r.StaticFileFS("/site.webmanifest", "./templates/assets/site.webmanifest", http.FS(templatesFolder))
 }
