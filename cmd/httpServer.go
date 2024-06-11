@@ -2,8 +2,11 @@ package cmd
 
 import (
 	"embed"
+	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -36,15 +39,41 @@ func WebServer() {
 	r.POST("/command/:clientid", execCMD)
 	r.POST("/kill/:clientid", sendKillswitch)
 	r.GET("/dump", dumpClients)
+	r.POST("/save", saveClients)
 	r.Run(":" + WebPort)
 }
 
 func dumpClients(c *gin.Context) {
+	jsonClients := marshalClients()
+	c.IndentedJSON(http.StatusOK, jsonClients)
+}
+
+func saveClients(c *gin.Context) {
+	log.Println("Saving clients...")
+	jsonClients := marshalClients()
+	fileToSaveTo, err := setClientPath()
+	if err != nil {
+		log.Print(err)
+		return
+	}
+
+	f, err := os.Create(fileToSaveTo)
+	if err != nil {
+		log.Print(err)
+		return
+	}
+	defer f.Close()
+	as_json, _ := json.MarshalIndent(jsonClients, "", "\t")
+	f.Write(as_json)
+	log.Println("SUCCESS!")
+}
+
+func marshalClients() ClientJSON {
 	jsonClients := ClientJSON{Date: time.Now()}
 	for _, v := range clientList {
 		jsonClients.List = append(jsonClients.List, v.ClientBasicInfo)
 	}
-	c.IndentedJSON(http.StatusOK, jsonClients)
+	return jsonClients
 }
 
 func getRoot(c *gin.Context) {

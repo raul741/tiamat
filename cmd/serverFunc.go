@@ -32,11 +32,11 @@ func (c Client) Instruct(i Instructions) error {
 	return nil
 }
 
-func recoverClients() error {
+func setClientPath() (string, error) {
 	var fileToOpen string
 	home, err := os.UserHomeDir()
 	if err != nil {
-		return err
+		return "", err
 	}
 	if isUsingJSONParameter == false {
 		fileToOpen = home + clientJSONPath
@@ -46,6 +46,15 @@ func recoverClients() error {
 		}
 	} else {
 		fileToOpen = clientJSONPath
+	}
+
+	return fileToOpen, nil
+}
+
+func recoverClients() error {
+	fileToOpen, err := setClientPath()
+	if err != nil {
+		return err
 	}
 
 	clients := ClientJSON{}
@@ -104,6 +113,7 @@ func handleConn(conn net.Conn) {
 	ID, err := getClient(conn)
 	if err != nil {
 		log.Printf("Error happened receiving OS information: %v\n", err)
+		return
 	}
 
 	go Heartbeat(ID)
