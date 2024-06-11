@@ -50,6 +50,9 @@
           <td rowspan=2>
             <a href="/" hx-post="kill/{{ .ClientID }}" hx-swap="none" id="pointer"><b>KILL</b></a>
           </td>
+          <td rowspan=2>
+            <a href="/" hx-post="remove/{{ .ClientID }}" hx-swap="none" id="pointer"><b>REMOVE</b></a>
+          </td>
         </tr>
         <tr>
           <td>{{ .ClientID }}</td>

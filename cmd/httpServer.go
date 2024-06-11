@@ -40,6 +40,7 @@ func WebServer() {
 	r.POST("/kill/:clientid", sendKillswitch)
 	r.GET("/dump", dumpClients)
 	r.POST("/save", saveClients)
+	r.POST("/remove/:clientid", removeClient)
 	r.Run(":" + WebPort)
 }
 
@@ -66,6 +67,22 @@ func saveClients(c *gin.Context) {
 	as_json, _ := json.MarshalIndent(jsonClients, "", "\t")
 	f.Write(as_json)
 	log.Println("SUCCESS!")
+}
+
+func removeClient(c *gin.Context) {
+	clientID := c.Param("clientid")
+	intClientID, err := strconv.Atoi(clientID)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "Error happened fetching client: %v", err)
+		return
+	}
+	log.Printf("Removing client %v\n", intClientID)
+	if len(clientList) != 1 {
+		clientList = append(clientList[:intClientID], clientList[intClientID+1:]...)
+	} else {
+		clientList = nil
+	}
+	log.Printf("Success!")
 }
 
 func marshalClients() ClientJSON {
