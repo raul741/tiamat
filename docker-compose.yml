@@ -5,9 +5,8 @@ networks:
     driver: bridge
 
 services:
-  tiamat:
+  default:
     container_name: "tiamat"
-    #image: "tiamat"
     build:
       context: .
       dockerfile: "Dockerfile"
@@ -17,4 +16,4 @@ services:
     networks:
       - tiamat
     volumes:
-      - ./sample-config/:/root/.config/tiamat/
+      - ./sample-config/:/home/tiamat/.config/tiamat/

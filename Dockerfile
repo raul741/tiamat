@@ -1,11 +1,22 @@
 FROM golang:1.22-alpine
 
-RUN mkdir /app
+ENV USER=tiamat
+ENV GROUPNAME=$USER
+ENV UID=1000
+ENV GID=1000
+ENV APP_HOME="/home/tiamat/app"
 
-ADD . /app
+RUN addgroup --gid "$GID" "$GROUPNAME"
+RUN adduser --gecos "" --disabled-password --ingroup "$GROUPNAME" --uid "$UID" "$USER"
 
-WORKDIR /app
+USER "$USER"
+
+RUN mkdir "$APP_HOME"
+
+ADD . "$APP_HOME"
+
+WORKDIR "$APP_HOME"
 
 RUN go build -o main .
 
-CMD ["/app/main", "server"]
+CMD ["./main", "server"]
