@@ -76,6 +76,13 @@ func removeClient(c *gin.Context) {
 		c.String(http.StatusInternalServerError, "Error happened fetching client: %v", err)
 		return
 	}
+	client, err := returnClient(intClientID)
+	if err != nil {
+		return
+	}
+	client.Instruct(Instructions{
+		IsKillswitch: true,
+	})
 	log.Printf("Removing client %v\n", intClientID)
 	if len(clientList) != 1 {
 		clientList = append(clientList[:intClientID], clientList[intClientID+1:]...)
@@ -143,14 +150,19 @@ func execCMD(c *gin.Context) {
 		return
 	}
 
-	if clientList[idInt].IsOnline == false {
+	client, err := returnClient(idInt)
+	if err != nil {
+		return
+	}
+
+	if client.IsOnline == false {
 		c.String(http.StatusOK, "Client is currently offline!")
 		return
 	}
 
 	command, _ := c.GetPostForm("cmd")
 
-	out, err := sendCommand(idInt, command)
+	out, err := sendCommand(client, command)
 	if err != nil {
 		e := fmt.Sprintf("Error happened executing command: %v\n", err)
 		c.String(http.StatusOK, e)

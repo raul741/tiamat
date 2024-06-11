@@ -119,13 +119,13 @@ func handleConn(conn net.Conn) {
 	go Heartbeat(ID)
 }
 
-func sendCommand(ID int, command string) (Output string, err error) {
+func sendCommand(client Client, command string) (Output string, err error) {
 	inst := Instructions{
 		IsCommand: true,
 		Message:   command,
 	}
-	clientList[ID].Instruct(inst)
-	resp, err := ServerMessageReceiver(clientList[ID].Conn)
+	client.Instruct(inst)
+	resp, err := ServerMessageReceiver(client.Conn)
 	if err != nil || resp.Successful != true {
 		e := fmt.Errorf("%v\n", resp.Message)
 		return "", e
@@ -135,22 +135,24 @@ func sendCommand(ID int, command string) (Output string, err error) {
 
 func Heartbeat(ID int) {
 	for {
-		if len(clientList) == 0 {
+		client, err := returnClient(ID)
+		if err != nil {
 			return
 		}
+
 		inst := Instructions{
 			IsHeartbeat: true,
 			Message:     "PING",
 		}
-		clientList[ID].Instruct(inst)
-		resp, err := ServerMessageReceiver(clientList[ID].Conn)
+		client.Instruct(inst)
+		resp, err := ServerMessageReceiver(client.Conn)
 		if err == nil && resp.Message == "PONG" {
-			if clientList[ID].IsOnline != true {
-				clientList[ID].IsOnline = true
+			if client.IsOnline != true {
+				client.IsOnline = true
 			}
 		} else {
-			log.Printf("Client %v is offline :(\n", clientList[ID].ClientBasicInfo.Hostname)
-			clientList[ID].IsOnline = false
+			log.Printf("Client %v is offline :(\n", client.ClientBasicInfo.Hostname)
+			client.IsOnline = false
 			return
 		}
 
