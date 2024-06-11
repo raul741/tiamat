@@ -135,6 +135,9 @@ func sendCommand(ID int, command string) (Output string, err error) {
 
 func Heartbeat(ID int) {
 	for {
+		if len(clientList) == 0 {
+			return
+		}
 		inst := Instructions{
 			IsHeartbeat: true,
 			Message:     "PING",
