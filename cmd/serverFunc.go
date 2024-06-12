@@ -135,7 +135,7 @@ func sendCommand(client Client, command string) (Output string, err error) {
 
 func Heartbeat(ID int) {
 	for {
-		client, err := returnClient(ID)
+		client, _, err := returnClient(ID)
 		if err != nil {
 			return
 		}
@@ -160,14 +160,14 @@ func Heartbeat(ID int) {
 	}
 }
 
-func returnClient(ID int) (Client, error) {
-	for _, v := range clientList {
+func returnClient(ID int) (*Client, int, error) {
+	for i, v := range clientList {
 		if v.ClientID == ID {
-			return v, nil
+			return &clientList[i], i, nil
 		}
 	}
 	err := fmt.Errorf("Client not found\n")
-	return Client{}, err
+	return &Client{}, -1, err
 }
 
 func ServerMessageReceiver(conn net.Conn) (Response, error) {
