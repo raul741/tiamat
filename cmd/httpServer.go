@@ -80,9 +80,13 @@ func removeClient(c *gin.Context) {
 	if err != nil {
 		return
 	}
-	client.Instruct(Instructions{
-		IsKillswitch: true,
-	})
+
+	if client.IsOnline == true {
+		client.Instruct(Instructions{
+			IsKillswitch: true,
+		})
+	}
+
 	log.Printf("Removing client %v\n", intClientID)
 	if len(clientList) != 1 {
 		clientList = append(clientList[:intClientID], clientList[intClientID+1:]...)
