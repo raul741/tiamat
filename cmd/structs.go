@@ -38,3 +38,7 @@ type Response struct {
 	Successful bool
 	Message    string
 }
+
+type Bulk struct {
+	ClientIDs []int `form:"clients[]"`
+}
