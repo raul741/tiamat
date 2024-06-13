@@ -41,7 +41,33 @@ func WebServer() {
 	r.GET("/dump", dumpClients)
 	r.POST("/save", saveClients)
 	r.POST("/remove/:clientid", removeClient)
+	r.POST("/bulk-kill", bulkKill)
+	r.POST("/bulk-remove/", bulkRemove)
+
+	// Start
 	r.Run(":" + WebPort)
+}
+
+func bulkKill(c *gin.Context) {
+	list := Bulk{}
+	c.ShouldBind(&list)
+	if len(list.ClientIDs) == 0 {
+		return
+	}
+	for _, v := range list.ClientIDs {
+		genericKillswitch(v)
+	}
+}
+
+func bulkRemove(c *gin.Context) {
+	list := Bulk{}
+	c.ShouldBind(&list)
+	if len(list.ClientIDs) == 0 {
+		return
+	}
+	for _, v := range list.ClientIDs {
+		genericRemoveClient(v)
+	}
 }
 
 func dumpClients(c *gin.Context) {
@@ -76,7 +102,11 @@ func removeClient(c *gin.Context) {
 		c.String(http.StatusInternalServerError, "Error happened fetching client: %v", err)
 		return
 	}
-	client, id, err := returnClient(intClientID)
+	genericRemoveClient(intClientID)
+}
+
+func genericRemoveClient(id int) {
+	client, id, err := returnClient(id)
 	if err != nil {
 		return
 	}
@@ -87,7 +117,7 @@ func removeClient(c *gin.Context) {
 		})
 	}
 
-	log.Printf("Removing client %v\n", intClientID)
+	log.Printf("Removing client %v\n", id)
 	if len(clientList) != 1 {
 		clientList = append(clientList[:id], clientList[id+1:]...)
 	} else {
@@ -134,7 +164,11 @@ func sendKillswitch(c *gin.Context) {
 		c.String(http.StatusInternalServerError, "Error happened fetching client: %v", err)
 		return
 	}
-	_, id, err := returnClient(intClientID)
+	genericKillswitch(intClientID)
+}
+
+func genericKillswitch(id int) {
+	_, id, err := returnClient(id)
 	if err != nil {
 		return
 	}
