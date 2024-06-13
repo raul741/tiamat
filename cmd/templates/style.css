@@ -23,16 +23,19 @@ ul {
 
 li.hor {
   display: inline-flex;
+  vertical-align: center;
   margin-right: 20px;
 }
 
 td.left {
   text-align: left;
+  vertical-align: center;
   padding-left: 5px;
 }
 
 td {
   text-align: center;
+  vertical-align: center;
   padding: 5px;
 }
 

