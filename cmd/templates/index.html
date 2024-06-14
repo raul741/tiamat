@@ -34,7 +34,7 @@
       <h2 align=center>Current clients</h2>
       <hr>
 
-      <form>
+      <form hx-on--after-request="this.reset()">
         {{ range .Clients }}
         <table border=1>
           <tr>
