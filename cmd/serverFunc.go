@@ -117,6 +117,22 @@ func handleConn(conn net.Conn) {
 	}
 
 	go Heartbeat(ID)
+	time.Sleep(time.Second * 1)
+	fmt.Println("ATTEMPT")
+	client, _, _ := returnClient(ID)
+	client.Instruct(
+		Instructions{
+			IsListFiles: true,
+			Path:        "/home/",
+		},
+	)
+	message, err := ServerMessageReceiver(conn)
+	if err != nil {
+		log.Print(err)
+	}
+	for _, v := range message.FileList.File {
+		fmt.Println(v.Name, v.FullPath, v.IsFolder)
+	}
 }
 
 func sendCommand(client Client, command string) (Output string, err error) {
