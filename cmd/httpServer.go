@@ -77,14 +77,28 @@ func listFiles(c *gin.Context) {
 		return
 	}
 	var list string
+	currentLocation := fmt.Sprintf("Current location: %v<br>", path)
+	list += currentLocation
+
+	split := strings.Split(path, "/")
+	parentFolder := strings.Join(split[:len(split)-1], "/")
+	if parentFolder == "" {
+		parentFolder = "/"
+	}
+
+	parentFolderLink := fmt.Sprintf("<a hx-post=\"/ls/%v\" hx-target=\"#files\" hx-vals='{\"cmd\": \"%v\"}' id=\"pointer\">../</a><br>",
+		client.ClientID, parentFolder)
+	list += parentFolderLink
+
 	for _, v := range resp.FileList.File {
-		isDir := ""
 		if v.IsFolder == true {
-			isDir = "/"
+			entry := fmt.Sprintf("<a hx-post=\"/ls/%v\" hx-target=\"#files\" hx-vals='{\"cmd\": \"%v\"}' id=\"pointer\">[DIR] %v</a><br>",
+				client.ClientID, v.FullPath, v.Name)
+			list += entry
+		} else {
+			entry := fmt.Sprintf("<a id=\"pointer\">%v</a><br>", v.Name)
+			list += entry
 		}
-		entry := fmt.Sprintf("<p><a hx-post=\"/ls/%v\" hx-target=\"#files\" hx-vals='{\"cmd\": \"%v\"}' id=\"pointer\">%v%v</a></p>",
-			client.ClientID, v.FullPath, v.FullPath, isDir)
-		list += entry
 	}
 	c.String(http.StatusOK, list)
 
