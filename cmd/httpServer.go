@@ -82,7 +82,7 @@ func listFiles(c *gin.Context) {
 		if v.IsFolder == true {
 			isDir = "/"
 		}
-		entry := fmt.Sprintf("<p><a hx-post=\"/ls/%v\" hx-target=\"#command\" hx-vals='{\"cmd\": \"%v\"}' id=\"pointer\">%v%v</a></p>",
+		entry := fmt.Sprintf("<p><a hx-post=\"/ls/%v\" hx-target=\"#files\" hx-vals='{\"cmd\": \"%v\"}' id=\"pointer\">%v%v</a></p>",
 			client.ClientID, v.FullPath, v.FullPath, isDir)
 		list += entry
 	}

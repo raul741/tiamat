@@ -154,12 +154,26 @@ div#command {
   text-wrap: nowrap;
 }
 
+div#files {
+  width: 100%;
+  height: 60%;
+  border: 2px solid black;
+  overflow: scroll;
+  padding-bottom: 30px;
+  text-wrap: nowrap;
+}
+
 input#commandinput {
   width: 60%;
   height: 20px;
 }
 
-input#commandinput:focus {
+input#fileinput {
+  width: 91%;
+  height: 20px;
+}
+
+input:focus {
   outline: 2px solid #ff6e00;
 }
 
