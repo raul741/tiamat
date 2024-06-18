@@ -105,6 +105,11 @@ form {
   text-align: center;
 }
 
+form#uploader {
+  text-align: left;
+  margin-top: 10px;
+}
+
 td a.clickable {
   display: block;
   width: 100%;
