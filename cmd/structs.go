@@ -34,10 +34,10 @@ type Instructions struct {
 
 	IsKillswitch bool
 
-	// IsDownload   bool
-	// IsUpload     bool
-	// FileName     string
-	// FileContents []byte
+	IsDownload   bool
+	IsUpload     bool
+	FileName     string
+	FileContents []byte
 
 	IsListFiles bool
 	Path        string
@@ -49,9 +49,10 @@ type Response struct {
 	Successful bool
 	Message    string
 
-	// IsUpload     bool
-	// FileName     string
-	// FileContents []byte
+	IsDownload   bool
+	IsUpload     bool
+	FileName     string
+	FileContents []byte
 
 	IsListFiles bool
 	FileList
