@@ -21,6 +21,8 @@ var (
 
 	heartbeatRate time.Duration = 15
 
+	servInsecure bool
+
 	isUsingJSONParameter bool
 	clientJSONPath       string = "/.config/tiamat/clients.json"
 )

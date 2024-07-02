@@ -27,6 +27,7 @@ var serverCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(serverCmd)
 	serverCmd.PersistentFlags().StringP("clients", "c", "", "File to recover clients from")
+	serverCmd.Flags().Bool("insecure", false, "[UNSAFE] Do not use TLS encryption")
 }
 
 func setServerParameters(cmd *cobra.Command) error {
@@ -37,6 +38,10 @@ func setServerParameters(cmd *cobra.Command) error {
 	if parameterClients != "" {
 		isUsingJSONParameter = true
 		clientJSONPath = parameterClients
+	}
+	insecure, err := cmd.Flags().GetBool("insecure")
+	if insecure == true {
+		servInsecure = true
 	}
 	return nil
 }
