@@ -43,6 +43,7 @@ func initConfig() {
 
 		// Search config in home directory with name ".tune" (without extension).
 		viper.AddConfigPath(home + "/.config/tiamat")
+		configDir = home + "/.config/tiamat"
 		viper.SetConfigType("toml")
 		viper.SetConfigName("tiamat")
 	}

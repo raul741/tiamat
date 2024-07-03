@@ -9,7 +9,6 @@ import (
 	"log"
 )
 
-// serverCmd represents the server command
 var serverCmd = &cobra.Command{
 	Use:   "server",
 	Short: "Tiamat Server",

@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"crypto/tls"
+	_ "embed"
 	"encoding/gob"
 	"encoding/json"
 	"fmt"
@@ -9,12 +11,16 @@ import (
 	"mime/multipart"
 	"net"
 	"os"
+	"os/exec"
+	"strings"
 	"time"
 
 	"github.com/spf13/viper"
 )
 
 var (
+	configDir string
+
 	C2Port     string = "1302"
 	clientList []Client
 	clientIDs  int = 0
@@ -22,10 +28,14 @@ var (
 	heartbeatRate time.Duration = 15
 
 	servInsecure bool
+	servCert     string
 
 	isUsingJSONParameter bool
 	clientJSONPath       string = "/.config/tiamat/clients.json"
 )
+
+//go:embed gen-cert.sh
+var script string
 
 func (c Client) Instruct(i Instructions) error {
 	enc := gob.NewEncoder(c.Conn)
@@ -34,6 +44,37 @@ func (c Client) Instruct(i Instructions) error {
 		return err
 	}
 	return nil
+}
+
+func createCerts() {
+	log.Println("[-] Certificates don't exist! Creating them...")
+	c := exec.Command("bash")
+	c.Stdin = strings.NewReader(script)
+	b, err := c.Output()
+	if err != nil {
+		log.Fatalf("Error occurred creating certificates: %v\n", err)
+	}
+	fmt.Print(string(b))
+}
+
+func startInsecureServer() (net.Listener, error) {
+	ln, err := net.Listen("tcp", ":"+C2Port)
+	return ln, err
+}
+
+func startSecureServer() (net.Listener, error) {
+	cer, err := tls.LoadX509KeyPair(configDir+"/server.crt", configDir+"/server.key")
+
+	if os.IsNotExist(err) {
+		createCerts()
+		cer, err = tls.LoadX509KeyPair(configDir+"/server.crt", configDir+"/server.key")
+	}
+	if err != nil {
+		log.Fatalf("Error happened loading certificates: %v\n", err)
+	}
+	config := &tls.Config{Certificates: []tls.Certificate{cer}}
+	ln, err := tls.Listen("tcp", ":"+C2Port, config)
+	return ln, err
 }
 
 func setClientPath() (string, error) {
@@ -97,7 +138,15 @@ func Server() {
 		log.Fatalf("Error happened recovering clients: %v\n", err)
 	}
 
-	ln, err := net.Listen("tcp", ":"+C2Port)
+	//ln, err := net.Listen("tcp", ":"+C2Port)
+	var ln net.Listener
+	var err error
+	if servInsecure == true {
+		log.Println("WARNING: Starting unencrypted server!")
+		ln, err = startInsecureServer()
+	} else {
+		ln, err = startSecureServer()
+	}
 	if err != nil {
 		log.Fatalf("Error happened listening on C2 port: %v\n", err)
 	}
